@@ -1,0 +1,21 @@
+# 配置文件
+config.ini
+.env
+
+# Python 缓存
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# 虚拟环境
+venv/
+.venv/
+
+# IDE/编辑器特定文件
+.vscode/
+.idea/
+
+# 报告文件
+*.html
+reports/
