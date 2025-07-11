@@ -49,6 +49,9 @@ pip install configparser requests beautifulsoup4 google-generativeai markdown2 u
 ```bash
 python main.py
 ```
+<img width="699" height="460" alt="image" src="https://github.com/user-attachments/assets/02a96720-50c8-4024-86b4-72b04d12def0" />
+<img width="630" height="897" alt="image" src="https://github.com/user-attachments/assets/2cae339c-b7cf-42dd-87f3-d89847d5bf71" />
+
 
 ### 选择分析模式
 程序启动后会提示选择分析模式：
@@ -184,6 +187,9 @@ js-security-analyzer/
 - 集成Gemini AI分析
 - HTML报告生成
 - 反爬虫机制
+### v1.0.1
+
+- 美化HTML报告模板
 
 
 
