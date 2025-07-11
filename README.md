@@ -33,32 +33,14 @@ pip install configparser requests beautifulsoup4 google-generativeai markdown2 u
 
 ## 配置设置
 
-### 1. 创建配置文件
-复制并重命名 `config.ini.example` 为 `config.ini`：
 
-```ini
-[Gemini]
-api_key = YOUR_GEMINI_API_KEY
-model = gemini-pro
-max_chunk_size = 15000
 
-[Proxy]
-type = http
-host = 127.0.0.1
-port = 8080
-
-[Prompt]
-custom_prompt = 请分析以下JavaScript代码的安全问题...
-chunk_prompt = 请继续分析以下JavaScript代码片段...
-summary_prompt = 基于以下分析报告，生成最终总结...
-```
-
-### 2. 获取Gemini API Key
+### 1. 获取Gemini API Key
 1. 访问 [Google AI Studio](https://makersuite.google.com/app/apikey)
 2. 创建新的API密钥
 3. 将API密钥填入 `config.ini` 文件的 `api_key` 字段
 
-### 3. 配置代理（可选）
+### 2. 配置代理（可选）
 如果需要使用代理访问Gemini API，请在配置文件中设置代理信息。
 
 ## 使用方法
@@ -103,7 +85,6 @@ python main.py
 js-security-analyzer/
 ├── main.py                 # 主程序文件
 ├── config.ini              # 配置文件
-├── config.ini.example      # 配置文件示例
 ├── requirements.txt        # 依赖包列表
 ├── README.md              # 说明文档
 └── reports/               # 生成的分析报告目录
@@ -204,9 +185,7 @@ js-security-analyzer/
 - HTML报告生成
 - 反爬虫机制
 
-## 许可证
 
-本项目采用 MIT 许可证。详见 [LICENSE](LICENSE) 文件。
 
 ## 贡献指南
 
@@ -216,7 +195,7 @@ js-security-analyzer/
 
 如有问题或建议，请通过以下方式联系：
 - 提交Issue
-- 发送邮件
+- 发送邮件280216zyw@gmail.com
 - 项目讨论区
 
 ---
