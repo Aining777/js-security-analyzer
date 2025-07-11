@@ -1,8 +1,3 @@
-### 项目描述
-
-本项目是一个基于 Python 的命令行工具，利用 Google Gemini API 对 JavaScript (JS) 代码进行自动化安全分析。它支持从本地文件、本地目录或远程网站 URL 中获取 JS 代码，并能够处理超长代码，将其分块发送给 AI 进行分析，最后生成结构清晰、内容详尽的 HTML 报告。该工具旨在帮助开发者和安全研究人员快速识别 JS 代码中潜在的安全漏洞、不当的编码实践和性能问题。
-
-### README.md
 
 #### JS 代码安全分析器 (JS Code Security Analyzer)
 
@@ -58,9 +53,9 @@
 # 您的 Gemini API Key，请勿泄露
 api_key = YOUR_GEMINI_API_KEY
 # 推荐使用的模型，例如 gemini-pro 或 gemini-1.5-pro-latest
-model = gemini-pro
+model = gemini-2.5-flash
 # 单次发送给 Gemini API 的最大代码字符数，超过此值将分块处理
-max_chunk_size = 15000
+max_chunk_size = 100000
 
 [Prompt]
 # 第一次或单次发送时的提示词模板
