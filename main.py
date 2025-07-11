@@ -396,40 +396,470 @@ def main():
                 
                 # 添加一些CSS样式
                 html_template = f"""
-                <!DOCTYPE html>
-                <html lang="zh-CN">
-                <head>
-                    <meta charset="UTF-8">
-                    <title>JS代码安全分析报告</title>
-                    <style>
-                        body {{ font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; line-height: 1.6; margin: 2em; background-color: #f9f9f9; color: #333; }}
-                        .container {{ max-width: 800px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }}
-                        h1, h2, h3 {{ color: #2c3e50; }}
-                        code {{ background-color: #eee; padding: 2px 4px; border-radius: 4px; font-family: "Courier New", Courier, monospace; }}
-                        pre {{ background-color: #2d2d2d; color: #f8f8f2; padding: 1em; border-radius: 5px; overflow-x: auto; }}
-                        pre code {{ background-color: transparent; padding: 0; }}
-                        table {{ border-collapse: collapse; width: 100%; margin-bottom: 1em; }}
-                        th, td {{ border: 1px solid #ddd; padding: 8px; text-align: left; }}
-                        th {{ background-color: #f2f2f2; }}
-                        .file-info {{ background-color: #e8f4f8; padding: 15px; border-radius: 5px; margin-bottom: 20px; }}
-                        .file-info h3 {{ margin-top: 0; color: #2980b9; }}
-                    </style>
-                </head>
-                <body>
-                    <div class="container">
-                        <h1>JS代码安全分析报告</h1>
-                        <div class="file-info">
-                            <h3>分析文件信息</h3>
-                            <p><strong>文件名:</strong> {file_name}</p>
-                            <p><strong>文件大小:</strong> {js_file['size_formatted']}</p>
-                            {"<p><strong>文件路径:</strong> " + js_file['path'] + "</p>" if source_type == "local" else "<p><strong>文件URL:</strong> " + js_file['url'] + "</p>"}
-                            <p><strong>分析时间:</strong> {time.strftime('%Y-%m-%d %H:%M:%S')}</p>
-                        </div>
-                        <hr>
-                        {html_content}
+               <!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS代码安全分析报告</title>
+    <style>
+        * {{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }}
+
+        body {{
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }}
+
+        .container {{
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+            animation: fadeIn 0.8s ease-out;
+        }}
+
+        @keyframes fadeIn {{
+            from {{ opacity: 0; transform: translateY(30px); }}
+            to {{ opacity: 1; transform: translateY(0); }}
+        }}
+
+        .header {{
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }}
+
+        .header::before {{
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="75" cy="75" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="50" cy="10" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="10" cy="60" r="1" fill="rgba(255,255,255,0.1)"/><circle cx="90" cy="40" r="1" fill="rgba(255,255,255,0.1)"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+            opacity: 0.3;
+        }}
+
+        .header h1 {{
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+            position: relative;
+            z-index: 1;
+        }}
+
+        .header .subtitle {{
+            font-size: 1.2em;
+            opacity: 0.9;
+            position: relative;
+            z-index: 1;
+        }}
+
+        .content {{
+            padding: 40px;
+        }}
+
+        .file-info {{
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border-left: 5px solid #3498db;
+            position: relative;
+            overflow: hidden;
+        }}
+
+        .file-info::before {{
+            content: '📄';
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 3em;
+            opacity: 0.1;
+        }}
+
+        .file-info h3 {{
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }}
+
+        .file-info h3::before {{
+            content: '🔍';
+            font-size: 1.2em;
+        }}
+
+        .info-grid {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }}
+
+        .info-item {{
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }}
+
+        .info-item:hover {{
+            transform: translateY(-2px);
+        }}
+
+        .info-item strong {{
+            color: #2c3e50;
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }}
+
+        .info-item span {{
+            color: #666;
+            font-size: 0.95em;
+        }}
+
+        h1, h2, h3, h4, h5, h6 {{
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }}
+
+        h1 {{ font-size: 2.2em; border-bottom: 3px solid #3498db; padding-bottom: 10px; }}
+        h2 {{ font-size: 1.8em; margin-top: 40px; position: relative; }}
+        h3 {{ font-size: 1.4em; margin-top: 30px; }}
+
+        h2::before {{
+            content: '';
+            position: absolute;
+            left: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 4px;
+            height: 20px;
+            background: linear-gradient(135deg, #3498db, #2c3e50);
+            border-radius: 2px;
+        }}
+
+        p {{
+            margin-bottom: 15px;
+            text-align: justify;
+        }}
+
+        code {{
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-family: "Fira Code", "Courier New", Courier, monospace;
+            font-size: 0.9em;
+            color: #e74c3c;
+            border: 1px solid #dee2e6;
+        }}
+
+        pre {{
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+            color: #ecf0f1;
+            padding: 25px;
+            border-radius: 12px;
+            overflow-x: auto;
+            margin: 20px 0;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            position: relative;
+            border: 1px solid #34495e;
+        }}
+
+        pre::before {{
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 20px;
+            width: 12px;
+            height: 12px;
+            background: #e74c3c;
+            border-radius: 50%;
+            box-shadow: 24px 0 0 #f39c12, 48px 0 0 #27ae60;
+        }}
+
+        pre code {{
+            background: transparent;
+            padding: 0;
+            border: none;
+            color: inherit;
+            font-size: 0.9em;
+            line-height: 1.6;
+        }}
+
+        table {{
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }}
+
+        th, td {{
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #e9ecef;
+        }}
+
+        th {{
+            background: linear-gradient(135deg, #3498db 0%, #2c3e50 100%);
+            color: white;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.9em;
+            letter-spacing: 0.5px;
+        }}
+
+        tr:nth-child(even) {{
+            background: #f8f9fa;
+        }}
+
+        tr:hover {{
+            background: #e3f2fd;
+            transition: background 0.3s ease;
+        }}
+
+        .alert {{
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            border-left: 5px solid;
+            position: relative;
+            overflow: hidden;
+        }}
+
+        .alert::before {{
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0.05;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                currentColor 10px,
+                currentColor 20px
+            );
+        }}
+
+        .alert-danger {{
+            background: #fff5f5;
+            border-left-color: #e74c3c;
+            color: #c0392b;
+        }}
+
+        .alert-warning {{
+            background: #fefcf3;
+            border-left-color: #f39c12;
+            color: #d68910;
+        }}
+
+        .alert-info {{
+            background: #f0f8ff;
+            border-left-color: #3498db;
+            color: #2980b9;
+        }}
+
+        .alert-success {{
+            background: #f0fff4;
+            border-left-color: #27ae60;
+            color: #229954;
+        }}
+
+        blockquote {{
+            background: #f8f9fa;
+            border-left: 4px solid #3498db;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 0 10px 10px 0;
+            font-style: italic;
+            position: relative;
+        }}
+
+        blockquote::before {{
+            content: '"';
+            font-size: 4em;
+            color: #3498db;
+            position: absolute;
+            top: -10px;
+            left: 10px;
+            opacity: 0.3;
+        }}
+
+        ul, ol {{
+            margin: 15px 0;
+            padding-left: 30px;
+        }}
+
+        li {{
+            margin-bottom: 8px;
+            position: relative;
+        }}
+
+        ul li::marker {{
+            content: '▶ ';
+            color: #3498db;
+        }}
+
+        .footer {{
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+            margin-top: 40px;
+        }}
+
+        .footer p {{
+            margin: 0;
+            opacity: 0.9;
+        }}
+
+        .badge {{
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin: 2px;
+        }}
+
+        .badge-danger {{ background: #e74c3c; color: white; }}
+        .badge-warning {{ background: #f39c12; color: white; }}
+        .badge-info {{ background: #3498db; color: white; }}
+        .badge-success {{ background: #27ae60; color: white; }}
+
+        .progress-bar {{
+            background: #e9ecef;
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+            margin: 10px 0;
+        }}
+
+        .progress-fill {{
+            height: 100%;
+            background: linear-gradient(90deg, #3498db, #2c3e50);
+            border-radius: 10px;
+            transition: width 0.8s ease;
+        }}
+
+        @media (max-width: 768px) {{
+            .container {{
+                margin: 10px;
+                border-radius: 15px;
+            }}
+            
+            .header, .content {{
+                padding: 20px;
+            }}
+            
+            .header h1 {{
+                font-size: 2em;
+            }}
+            
+            .info-grid {{
+                grid-template-columns: 1fr;
+            }}
+            
+            pre {{
+                padding: 15px;
+                font-size: 0.8em;
+            }}
+        }}
+
+        /* 滚动条样式 */
+        ::-webkit-scrollbar {{
+            width: 8px;
+            height: 8px;
+        }}
+
+        ::-webkit-scrollbar-track {{
+            background: #f1f1f1;
+            border-radius: 10px;
+        }}
+
+        ::-webkit-scrollbar-thumb {{
+            background: linear-gradient(135deg, #3498db, #2c3e50);
+            border-radius: 10px;
+        }}
+
+        ::-webkit-scrollbar-thumb:hover {{
+            background: linear-gradient(135deg, #2980b9, #34495e);
+        }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔒 JS代码安全分析报告</h1>
+            <div class="subtitle">专业的JavaScript代码安全检测与分析</div>
+        </div>
+        
+        <div class="content">
+            <div class="file-info">
+                <h3>📋 分析文件信息</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <strong>📄 文件名称</strong>
+                        <span>{file_name}</span>
                     </div>
-                </body>
-                </html>
+                    <div class="info-item">
+                        <strong>📊 文件大小</strong>
+                        <span>{js_file['size_formatted']}</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>🔗 文件路径</strong>
+                        <span>{"" if source_type == "url" else js_file['path']}</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>🌐 文件URL</strong>
+                        <span>{js_file['url'] if source_type == "url" else "本地文件"}</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>⏰ 分析时间</strong>
+                        <span>{time.strftime('%Y-%m-%d %H:%M:%S')}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <hr style="border: none; height: 2px; background: linear-gradient(90deg, #3498db, #2c3e50); margin: 40px 0; border-radius: 1px;">
+            
+            {html_content}
+        </div>
+        
+        <div class="footer">
+            <p>🚀 由 JavaScript 安全分析工具生成 | 📧 如发现漏洞请帮忙点个⭐</p>
+        </div>
+    </div>
+</body>
+</html>
+
                 """
                 
                 # 创建reports目录（如果不存在）
