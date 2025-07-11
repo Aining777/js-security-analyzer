@@ -197,7 +197,8 @@ js-security-analyzer/
 - 提交Issue
 - 发送邮件280216zyw@gmail.com
 - 项目讨论区
-
+## 鸣谢
+https://github.com/Xc1Ym/js_analysis
 ---
 
 **免责声明**：本工具仅用于学习和研究目的，使用者需要遵守相关法律法规和网站的使用条款。
